@@ -16,10 +16,13 @@ listOfTasks = Listbox(gui, height = 10, width = 15, bg = "grey", activestyle = '
 listOfTasks.grid()
 
 # Puts items from the file onto the listbox.
-with open("todolist.txt", 'r') as f:
-    for line in f:
-        if line.split() != "":
-            listOfTasks.insert(listOfTasks.size()+1, line)
+def populateListbox():
+    with open("todolist.txt", 'r') as f:
+        for line in f:
+            if line.strip() != "":
+                listOfTasks.insert(listOfTasks.size()+1, line)
+
+populateListbox()
 
 # Creates the entry box to remove a task.
 removeIndex = Entry(gui, width = 40)
@@ -46,11 +49,39 @@ def removeItemButton():
     elif (index > listOfTasks.size()-1):
         print("Not a valid index, there is not item with the index " + str(index + 1))
         return
-    else:
-        print(index)
+    
+    # Removes the item of the given index.
+    with open("todolist.txt", "r") as f:
+        item = f.readlines()
+        listIndex = index * 2
+    
+    del item[listIndex]
+    del item[listIndex]
+
+    newItems = []
+    counter = 1
+
+    # Creates a new list with the correct index and item contents.
+    for thing in item:
+        if thing != '\n':
+           itemContents = thing.split(".", 1)
+           newItems.append(str(counter) + "." + itemContents[1])
+           counter += 1
+        else:
+            newItems.append(thing)       
+
+    # Deletes current file contents.
+    open("todolist.txt", 'w').close()
+
+    # Writes new file contents to the file, and repopulates the listbox
+    with open("todolist.txt", 'w') as f:
+        f.writelines(newItems)
+
+    listOfTasks.delete(0,END)
+    populateListbox()        
 
 # Puts the remove item on the GUI
-removeItemButton = Button(gui, text="Add to list", command=removeItemButton)
+removeItemButton = Button(gui, text="Remove from list", command=removeItemButton)
 removeItemButton.grid(column=1,row=1)
 
 # Creates GUI
